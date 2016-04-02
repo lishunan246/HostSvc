@@ -3,18 +3,33 @@
 
 namespace GkcHostSvc {
     using asio::ip::tcp;
-    std::string msg("Welcome");
-
+	
     class Client {
+		tcp::socket socket;
+		std::array<char, 10000> receive_buf{};
+		std::array<char, 10000> msg{ "Welcome" };
+		p_aint p;
+		
     public:
         using pClient=std::shared_ptr<Client>;
 
-        Client(asio::io_service &io_service) : socket(io_service) {
 
-        }
+		Client& operator=(const Client&) = delete;
+		Client& operator=(Client&&) = default;
+		explicit Client(asio::io_service &io_service, p_aint c) : socket(io_service), p(c)
+		{
+			std::cout << "connecting" << std::endl;
+			++(*p);
+		}
+		Client(const Client&) = delete;
+		Client(Client&&) = default;
+		~Client(){
+			--*p;
+			std::cout << "disconnecting" << std::endl;
+		}
 
-        static pClient create(asio::io_service &io_service) {
-            return std::make_shared<Client>(io_service);
+        static pClient create(asio::io_service &io_service,p_aint p) {
+            return std::make_shared<Client>(io_service,p);
         }
 
         tcp::socket &getSocket() {
@@ -27,18 +42,22 @@ namespace GkcHostSvc {
                               [](const asio::error_code &errorCode, std::size_t bytes_transferred) {
 
                               });
-        }
+			asio::async_read(socket,asio::buffer(receive_buf), [](const asio::error_code &errorCode, std::size_t bytes_transferred) {
 
-    private:
-        tcp::socket socket;
+			});
+        }
     };
 
     class ClientManager {
-    private:
-        tcp::acceptor acceptor;
+	    tcp::acceptor acceptor;
+		p_aint pCount = std::make_shared<a_int>(0);
+		std::vector<Client::pClient> vp;
     public:
-        ClientManager(asio::io_service &io_service) : acceptor(io_service, tcp::endpoint(tcp::v4(), PORT_INT)) {
-        }
+	    explicit ClientManager(asio::io_service &io_service) : acceptor(io_service, tcp::endpoint(tcp::v4(), PORT_INT)) {}
+		ClientManager(const ClientManager&) = delete;
+		ClientManager(ClientManager&&) noexcept = default;
+		ClientManager& operator=(const ClientManager&) = delete;
+		ClientManager& operator=(ClientManager&&) noexcept = default;
 
         void start_accept();
 
@@ -46,13 +65,17 @@ namespace GkcHostSvc {
     };
 
     void ClientManager::start_accept() {
-        auto newClient = Client::create(acceptor.get_io_service());
+        auto newClient = Client::create(acceptor.get_io_service(),pCount);
+		//vp.push_back(newClient);
         acceptor.async_accept(newClient->getSocket(), [this, newClient](const asio::error_code &ec) {
+			
             this->handle_accept(newClient, ec);
         });
     }
 
     void ClientManager::handle_accept(Client::pClient pClient, const asio::error_code &errorCode) {
+		std::cout << *pCount << std::endl;
+		
         if (!errorCode)
             pClient->start();
 

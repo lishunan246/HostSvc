@@ -20,10 +20,15 @@
 #include <iostream>
 #include <asio.hpp>
 #include <string>
+#include <atomic>
+#include <utility>
 
 namespace GkcHostSvc {
     static const int PORT_INT(10000);
     static const std::string PORT("10000");
+	using a_int = std::atomic<int>;
+	using p_aint = std::shared_ptr<a_int>;
+	using p_socket = std::shared_ptr<asio::ip::tcp::socket>;
 }
 
 #endif //HOSTSVC_HOSTSVCCOMMON_H
