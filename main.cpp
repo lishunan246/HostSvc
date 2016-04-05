@@ -4,6 +4,11 @@
 namespace GkcHostSvc {
     using asio::ip::tcp;
 
+	class Person_skeleton:public tutorial::Person
+	{
+		
+	};
+
     class Client {
 		tcp::socket socket;
 		std::array<char, 10000> receive_buf{};
@@ -40,7 +45,7 @@ namespace GkcHostSvc {
 
             asio::async_write(socket, asio::buffer(msg),
                               [](const asio::error_code &errorCode, std::size_t bytes_transferred) {
-
+				
                               });
 			asio::async_read(socket,asio::buffer(receive_buf), [](const asio::error_code &errorCode, std::size_t bytes_transferred) {
 

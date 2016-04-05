@@ -22,7 +22,7 @@
 #include <string>
 #include <atomic>
 #include <utility>
-
+#include "example.pb.h"
 namespace GkcHostSvc {
     static const int PORT_INT(10000);
     static const std::string PORT("10000");

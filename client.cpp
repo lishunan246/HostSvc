@@ -8,6 +8,11 @@ using asio::ip::tcp;
 using namespace GkcHostSvc;
 const static std::string server("127.0.0.1");
 
+class Person_stub :public tutorial::Person
+{
+	
+};
+
 int main() {
     try {
         asio::io_service io_service;

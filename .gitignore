@@ -300,3 +300,5 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 
+example.pb.h
+example.pb.cc
