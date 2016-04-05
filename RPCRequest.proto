@@ -1,0 +1,6 @@
+package GKC;
+
+message RPCRequest{
+    required string functionName=1;
+    required string param=2;
+}

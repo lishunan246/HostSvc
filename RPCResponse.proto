@@ -1,0 +1,6 @@
+package GKC;
+
+message RPCResponse{
+    required int32 status=1;
+    required string result=2;
+}

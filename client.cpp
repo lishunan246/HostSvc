@@ -10,6 +10,13 @@ const static std::string server("127.0.0.1");
 
 class Person_stub :public tutorial::Person
 {
+private:
+	p_socket socket;
+public:
+	explicit Person_stub(p_socket psocket) :socket(psocket) {};
+	void set_name(const ::std::string& value) {};
+	void set_name(const char* value){};
+	void set_id(int32_t value){};
 	
 };
 
@@ -21,17 +28,21 @@ int main() {
         tcp::resolver::query query(server, PORT);
         tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
-        tcp::socket socket(io_service);
-        asio::connect(socket, endpoint_iterator);
+		p_socket ps= std::make_shared<tcp::socket>(io_service);
+
+        asio::connect(*ps.get(), endpoint_iterator);
 
         std::array<char, 128> buf;
         asio::error_code error;
 
-        size_t len = socket.read_some(asio::buffer(buf), error);
+        size_t len = (*ps.get()).read_some(asio::buffer(buf), error);
 
            
 
        std::cout.write(buf.data(), len);
+	   Person_stub p(ps);
+	   p.set_id(123);
+	   p.set_name("sdf");
 
 	   
         
