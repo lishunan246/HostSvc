@@ -28,7 +28,7 @@
 #include "packedmessage.h"
 
 namespace GkcHostSvc {
-
+	using asio::ip::tcp;
 	using Request = GKC::RPCRequest;
 	using Response = GKC::RPCResponse;
     static const int PORT_INT(10000);

@@ -13,6 +13,7 @@ find_package(Threads REQUIRED)
 
 if (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0602")
+	LINK_DIRECTORIES("D:/protobuf-3.0.0-beta-2-build/Release")
 else(WIN32)
 
     message("LINUX")
@@ -22,3 +23,5 @@ set(SOURCE_FILES main.cpp HostSvcCommon.h)
 add_executable(HostSvc ${SOURCE_FILES})
 add_executable(Client client.cpp HostSvcCommon.h)
 target_link_libraries(Client ${CMAKE_THREAD_LIBS_INIT})
+
+

@@ -1,24 +1,15 @@
 package tutorial;
-
-message Person {
-  required string name = 1;
-  required int32 id = 2;
-  optional string email = 3;
-
-  enum PhoneType {
-    MOBILE = 0;
-    HOME = 1;
-    WORK = 2;
-  }
-
-  message PhoneNumber {
-    required string number = 1;
-    optional PhoneType type = 2 [default = HOME];
-  }
-
-  repeated PhoneNumber phone = 4;
+option cc_generic_services = true;
+message SearchRequest
+{
+    required string request=1;
 }
 
-message AddressBook {
-  repeated Person person = 1;
+message SearchResponse
+{
+    required string response=1;
+}
+
+service SearchService {
+  rpc Search (SearchRequest) returns (SearchResponse);
 }
