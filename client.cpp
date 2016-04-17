@@ -3,7 +3,7 @@
 //
 
 #include "HostSvcCommon.h"
-
+#include "example.pb.h"
 using asio::ip::tcp;
 using namespace GkcHostSvc;
 const static std::string server("127.0.0.1");
@@ -12,12 +12,15 @@ using namespace google;
 
 protobuf::RpcChannel* channel;
 protobuf::RpcController* controller;
-tutorial::SearchService* service;
-tutorial::SearchRequest request;
-tutorial::SearchResponse response;
+EchoService* service;
+FooRequest request;
+FooResponse response;
 
 class MyRpcChannel :public protobuf::RpcChannel
 {
+public:
+	MyRpcChannel(){}
+	~MyRpcChannel(){}
 	// Call the given method of the remote service.  The signature of this
 	// procedure looks the same as Service::CallMethod(), but the requirements
 	// are less strict in one important way:  the request and response objects
@@ -32,6 +35,14 @@ class MyRpcChannel :public protobuf::RpcChannel
 
 class MyRpcController:public protobuf::RpcController
 {
+public:
+	MyRpcController()
+	{
+	};
+	~MyRpcController()
+	{
+		
+	}
 	// Client-side methods ---------------------------------------------
 	// These calls may be made from the client side only.  Their results
 	// are undefined on the server side (may crash).
@@ -103,13 +114,13 @@ void DoSearch() {
 
 	// The protocol compiler generates the SearchService class based on the
 	// definition given above.
-	service = new tutorial::SearchService::Stub(channel);
+	service = new EchoService::Stub(channel);
 
 	// Set up the request.
-	request.set_request("protocol buffers");
+	request.set_text("protocol buffers");
 
 	// Execute the RPC.
-	service->Search(controller, &request, &response, protobuf::internal::NewCallback(&Done));
+	service->Foo(controller, &request, &response, protobuf::internal::NewCallback(&Done));
 }
 
 

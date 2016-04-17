@@ -1,15 +1,31 @@
-package tutorial;
+
 option cc_generic_services = true;
-message SearchRequest
-{
-    required string request=1;
+
+
+
+message FooRequest {
+
+	required string text = 1;
+
+	optional int32 times = 2;
+
 }
 
-message SearchResponse
-{
-    required string response=1;
+
+
+message FooResponse {
+
+	required string text = 1;
+
+	optional bool result = 2;
+
 }
 
-service SearchService {
-  rpc Search (SearchRequest) returns (SearchResponse);
+
+
+service EchoService {
+
+	rpc Foo(FooRequest) returns(FooResponse);
+
 }
+

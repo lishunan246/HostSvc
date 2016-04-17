@@ -63,7 +63,7 @@ namespace GkcHostSvc
 		{
 			if (!ec)
 			{
-				auto msg_len = PackedMessage<Request>::decode_header(read_buf);
+				auto msg_len = PackedMessage<FooRequest>::decode_header(read_buf);
 				start_read_body(msg_len);
 			}
 		};

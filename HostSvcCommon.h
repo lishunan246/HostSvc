@@ -22,15 +22,15 @@
 #include <string>
 #include <atomic>
 #include <utility>
-#include "example.pb.h"
-#include "RPCRequest.pb.h"
-#include "RPCResponse.pb.h"
+
+//#include "RPCRequest.pb.h"
+//#include "RPCResponse.pb.h"
 #include "packedmessage.h"
 
 namespace GkcHostSvc {
 	using asio::ip::tcp;
-	using Request = GKC::RPCRequest;
-	using Response = GKC::RPCResponse;
+//	using Request = GKC::RPCRequest;
+//	using Response = GKC::RPCResponse;
     static const int PORT_INT(10000);
     static const std::string PORT("10000");
 	using a_int = std::atomic<int>;

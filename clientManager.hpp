@@ -1,4 +1,5 @@
 #include "HostSvcCommon.h"
+#include "client.hpp"
 namespace GkcHostSvc
 {
 	class ClientManager {

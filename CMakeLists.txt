@@ -14,6 +14,7 @@ find_package(Threads REQUIRED)
 if (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0602")
 	LINK_DIRECTORIES("D:/protobuf-3.0.0-beta-2-build/Release")
+    LINK_DIRECTORIES("D:/protobuf-3.0.0-beta-2-build/Debug")
 else(WIN32)
 
     message("LINUX")

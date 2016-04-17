@@ -1,6 +1,7 @@
+syntax = "proto3";
 package GKC;
 
 message RPCRequest{
-    required string functionName=1;
-    required string param=2;
+     string functionName=1;
+     string param=2;
 }
