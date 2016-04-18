@@ -49,6 +49,7 @@ namespace GkcHostSvc {
                 auto request=m_packed_request.get_msg();
                 _service->Foo(&controller,request,&response, nullptr);
                 PackedMessage<FooResponse> p;
+                p.set_msg(&response);
                 p.pack(write_buf);
                 asio::write(socket, asio::buffer(write_buf));
 
