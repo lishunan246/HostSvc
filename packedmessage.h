@@ -9,18 +9,16 @@ template <typename T>
 class PackedMessage
 {
 public:
-	using MessagePointer = std::shared_ptr<T>;
-
-	PackedMessage(MessagePointer msg = MessagePointer()) : m_msg(msg)
+	PackedMessage():m_msg(new T){}
+	~PackedMessage() {
+		delete m_msg;
+	}
+	void set_msg(const T* msg)
 	{
+		m_msg = const_cast<T*> (msg);
 	}
 
-	void set_msg(MessagePointer msg)
-	{
-		m_msg = msg;
-	}
-
-	MessagePointer get_msg()
+	const T* get_msg()
 	{
 		return m_msg;
 	}
@@ -37,7 +35,9 @@ public:
 
 	bool unpack(const data_buffer& buf)
 	{
-		return m_msg->ParseFromArray(&buf[HEADER_SIZE], buf.size() - HEADER_SIZE);
+
+		return m_msg->ParseFromArray(buf.data()+HEADER_SIZE, buf.size() - HEADER_SIZE);
+
 	}
 
 	static void encode_header(data_buffer& buf, unsigned size)
@@ -61,7 +61,7 @@ public:
 
 
 private:
-	MessagePointer m_msg;
+	 T* m_msg;
 };
 
 #endif 

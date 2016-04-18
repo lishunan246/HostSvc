@@ -5,41 +5,16 @@
 
 using namespace GkcHostSvc;
 using namespace google::protobuf;
-class EchoServiceImpl : public EchoService {
 
-public:
-
-	EchoServiceImpl() {}
-
-	virtual void Foo(::google::protobuf::RpcController* controller,
-
-		const ::FooRequest* request,
-
-		::FooResponse* response,
-
-		::google::protobuf::Closure* done) {
-
-		std::string str = request->text();
-
-		std::string tmp = str;
-
-		for (int i = 1; i < request->times(); i++)
-
-			str += (" " + tmp);
-
-		response->set_text(str);
-
-		response->set_result(true);
-
-	}
-
-};
 int main() {
+	auto impl=std::make_shared<EchoServiceImpl>();
     asio::io_service io_service;
 	std::cout << sizeof(char) << std::endl;
 	std::cout << sizeof(int64_t) << std::endl;
     ClientManager clientManager(io_service);
+    clientManager.registerService(impl);
     clientManager.start_accept();
+
     io_service.run();
     return 0;
 }

@@ -1,86 +1,98 @@
 #include "HostSvcCommon.h"
 #include "example.pb.h"
-namespace GkcHostSvc
-{
-	class Client :public std::enable_shared_from_this<Client> {
-		tcp::socket socket;
-		std::array<char, 10000> receive_buf{};
-		std::array<char, 10000> msg{ "Welcome" };
-		data_buffer read_buf;
-		p_aint p;
-		
+#include "RPCController.h"
 
-	public:
-		using pClient = std::shared_ptr<Client>;
+namespace GkcHostSvc {
+    class Client : public std::enable_shared_from_this<Client> {
+        tcp::socket socket;
+        std::vector<char> read_buf,write_buf;
+        p_aint p;
+        std::shared_ptr<GkcHostSvc::EchoServiceImpl> _service;
+        PackedMessage<FooRequest> m_packed_request;
+    public:
+
+        using pClient = std::shared_ptr<Client>;
 
 
-		Client& operator=(const Client&) = delete;
-		Client& operator=(Client&&) = default;
-		explicit Client(asio::io_service &io_service, p_aint c) : socket(io_service), p(c)
-		{
-			std::cout << "connecting" << std::endl;
-			++(*p);
-		}
-		Client(const Client&) = delete;
-		Client(Client&&) = default;
-		~Client() {
-			--*p;
-			std::cout << "disconnecting" << std::endl;
-		}
+        Client &operator=(const Client &) = delete;
 
-		static pClient create(asio::io_service &io_service, p_aint p) {
-			return std::make_shared<Client>(io_service, p);
-		}
+        Client &operator=(Client &&) = default;
 
-		tcp::socket &getSocket() {
-			return socket;
-		}
+        explicit Client(asio::io_service &io_service, p_aint c, std::shared_ptr<GkcHostSvc::EchoServiceImpl> _s)
+                : socket(io_service), p(c), _service(_s) {
+            std::cout << "connecting" << std::endl;
+            ++(*p);
+        }
 
-		void handle_request()
-		{
-			
-		}
+        Client(const Client &) = delete;
 
-		void handle_read_body(const asio::error_code ec)
-		{
-			if (!ec)
-			{
-				start_read_header();
-				handle_request();
-			}
-		};
+        Client(Client &&) = default;
 
-		void start_read_body(unsigned msg_len)
-		{
-			read_buf.resize(HEADER_SIZE + msg_len);
-			auto self(shared_from_this());
-			asio::async_read(socket, asio::buffer(read_buf), [self](const asio::error_code& ec, std::size_t bytes_transferred)
-			{
-				self->handle_read_body(ec);
-			});
-		};
+        ~Client() {
+            --*p;
+            std::cout << "disconnecting" << std::endl;
+        }
 
-		void handle_read_header(const asio::error_code& ec)
-		{
-			if (!ec)
-			{
-				auto msg_len = PackedMessage<FooRequest>::decode_header(read_buf);
-				start_read_body(msg_len);
-			}
-		};
+        static pClient create(asio::io_service &io_service, p_aint p, std::shared_ptr<GkcHostSvc::EchoServiceImpl> _s) {
+            return std::make_shared<Client>(io_service, p, _s);
+        }
 
-		void start_read_header()
-		{
-			read_buf.resize(HEADER_SIZE);
-			auto self(shared_from_this());
-			asio::async_read(socket, asio::buffer(read_buf), [self](const asio::error_code& ec, std::size_t bytes_transferred)
-			{
-				self->handle_read_header(ec);
-			});
-		};
+        tcp::socket &getSocket() {
+            return socket;
+        }
 
-		void start() {
-			start_read_header();
-		}
-	};
+        void handle_request() {
+
+                auto msg=m_packed_request.unpack(read_buf);
+                MyRpcController controller;
+                FooResponse response;
+                auto request=m_packed_request.get_msg();
+                _service->Foo(&controller,request,&response, nullptr);
+                PackedMessage<FooResponse> p;
+                p.pack(write_buf);
+                asio::write(socket, asio::buffer(write_buf));
+
+        }
+
+        void handle_read_body(const asio::error_code ec) {
+            if (!ec) {
+
+                handle_request();
+                start_read_header();
+            }
+        };
+
+        void start_read_body(unsigned msg_len) {
+            read_buf.resize(HEADER_SIZE+msg_len);
+            auto self(shared_from_this());
+            asio::async_read(socket, asio::buffer(&read_buf[HEADER_SIZE],msg_len),
+                             [self](const asio::error_code &ec, std::size_t bytes_transferred) {
+                                 self->handle_read_body(ec);
+                             });
+        };
+
+        void handle_read_header(const asio::error_code &ec) {
+
+            if (!ec) {
+                unsigned msg_len = m_packed_request.decode_header(read_buf);
+
+                start_read_body(msg_len);
+            }
+        };
+
+        void start_read_header() {
+            read_buf.resize(HEADER_SIZE);
+            auto self(shared_from_this());
+            asio::async_read(socket, asio::buffer(read_buf),
+                             [self](const asio::error_code &ec, std::size_t bytes_transferred) {
+                                 self->handle_read_header(ec);
+                             });
+
+        };
+
+        void start()
+        {
+            start_read_header();
+       }
+    };
 }
