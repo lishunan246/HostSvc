@@ -4,6 +4,7 @@
 
 #include "HostSvcCommon.h"
 #include "example.pb.h"
+
 using asio::ip::tcp;
 using namespace GkcHostSvc;
 const static std::string server("127.0.0.1");

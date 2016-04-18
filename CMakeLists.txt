@@ -18,11 +18,16 @@ if (WIN32)
 else(WIN32)
 
     message("LINUX")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lprotobuf -lz")
 endif(WIN32)
 set(SOURCE_FILES main.cpp HostSvcCommon.h)
-add_executable(HostSvc ${SOURCE_FILES})
-add_executable(Client client.cpp HostSvcCommon.h)
-target_link_libraries(Client ${CMAKE_THREAD_LIBS_INIT})
+
+find_package(Protobuf REQUIRED)
+include_directories(${PROTOBUF_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS example.proto)
+add_executable(HostSvc ${SOURCE_FILES}  ${PROTO_SRCS} ${PROTO_HDRS})
+add_executable(Client client.cpp HostSvcCommon.h  ${PROTO_SRCS} ${PROTO_HDRS})
+target_link_libraries(Client ${CMAKE_THREAD_LIBS_INIT}  ${PROTOBUF_LIBRARIES})
 
 
