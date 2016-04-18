@@ -1,4 +1,5 @@
 #include "HostSvcCommon.h"
+#include "example.pb.h"
 namespace GkcHostSvc
 {
 	class Client :public std::enable_shared_from_this<Client> {

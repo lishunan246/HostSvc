@@ -29,5 +29,6 @@ PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS example.proto)
 add_executable(HostSvc ${SOURCE_FILES}  ${PROTO_SRCS} ${PROTO_HDRS})
 add_executable(Client client.cpp HostSvcCommon.h  ${PROTO_SRCS} ${PROTO_HDRS})
 target_link_libraries(Client ${CMAKE_THREAD_LIBS_INIT}  ${PROTOBUF_LIBRARIES})
+target_link_libraries(HostSvc ${CMAKE_THREAD_LIBS_INIT}  ${PROTOBUF_LIBRARIES})
 
 
