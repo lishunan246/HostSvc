@@ -20,6 +20,7 @@ namespace GkcHostSvc
 		bool registerService(std::shared_ptr<GkcHostSvc::EchoServiceImpl> s)
 		{
 			_s=s;
+			return true;
 		}
 
 	};

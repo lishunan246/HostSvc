@@ -4,24 +4,20 @@ project(HostSvc)
 if (WIN32)
     set(ASIO_INCLUDE "D:/asio-1.10.6/include" CACHE PATH "ASIO库的include目录")
     include_directories(${ASIO_INCLUDE})
-    set(PROTOBUF_INCLUDE "D:/protobuf-2.6.1/src" CACHE PATH "protobuf库的include目录")
-    include_directories(${PROTOBUF_INCLUDE})
-
+	set(PROTOBUF_SRC_ROOT_FOLDER "D:/protobuf-3.0.0-beta-2-build" CACHE PATH "")
 endif (WIN32)
 
 find_package(Threads REQUIRED)
 
 if (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0602")
-	LINK_DIRECTORIES("D:/protobuf-3.0.0-beta-2-build/Release")
-    LINK_DIRECTORIES("D:/protobuf-3.0.0-beta-2-build/Debug")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
 else(WIN32)
-
     message("LINUX")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lprotobuf -lz")
 endif(WIN32)
 set(SOURCE_FILES main.cpp HostSvcCommon.h)
-
 find_package(Protobuf REQUIRED)
 include_directories(${PROTOBUF_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
