@@ -9,24 +9,23 @@
 
 using namespace GkcHostSvc;
 
-class MyRpcChannel : public protobuf::RpcChannel {
+class Connection : public protobuf::RpcChannel {
 private:
-    asio::io_service io_service;
-    tcp::resolver resolver;
-    tcp::resolver::query query;
-    tcp::resolver::iterator endpoint_iterator;
-    tcp::socket _soc;
-    //p_socket _socket;
+    asio::io_service _io_service;
+    tcp::resolver _resolver;
+    tcp::resolver::query _query;
+    tcp::resolver::iterator _endpoint_iterator;
+    tcp::socket _socket;
     std::vector<char> _request, _response;
-    PackedMessage<FooRequest> pm;
-    PackedMessage<FooResponse> pr;
+    PackedMessage<FooRequest> _packedRequest;
+    PackedMessage<FooResponse> _packedResponse;
 public:
-    MyRpcChannel(const string& server,const string& PORT) :resolver(io_service),query(server, PORT),endpoint_iterator(resolver.resolve(query)),_soc(io_service)
+    Connection(const string& server,const string& PORT) :_resolver(_io_service),_query(server, PORT),_endpoint_iterator(_resolver.resolve(_query)),_socket(_io_service)
     {
-        asio::connect(_soc, endpoint_iterator);
+        asio::connect(_socket, _endpoint_iterator);
     }
 
-    ~MyRpcChannel() { }
+    ~Connection() { }
 
     // Call the given method of the remote service.  The signature of this
     // procedure looks the same as Service::CallMethod(), but the requirements
@@ -41,20 +40,20 @@ public:
 
 
         auto p = dynamic_cast<const FooRequest *> (request);
-        pm.set_msg(p);
-        pm.pack(_request);
+        _packedRequest.set_msg(p);
+        _packedRequest.pack(_request);
 
         asio::error_code ec;
-        asio::write(_soc,asio::buffer(_request), ec);
+        asio::write(_socket,asio::buffer(_request), ec);
         done->Run();
         _response.resize(HEADER_SIZE);
-        asio::read(_soc, asio::buffer(_response), ec);
+        asio::read(_socket, asio::buffer(_response), ec);
 
-        auto size = pr.decode_header(_response);
+        auto size = _packedResponse.decode_header(_response);
         _response.resize(size + HEADER_SIZE);
-        asio::read(_soc, asio::buffer(&_response[HEADER_SIZE], size), ec);
-        pr.unpack(_response);
-        auto x = pr.get_msg();
+        asio::read(_socket, asio::buffer(&_response[HEADER_SIZE], size), ec);
+        _packedResponse.unpack(_response);
+        auto x = _packedResponse.get_msg();
         auto tt = const_cast<FooResponse *>(x);
         auto xx = static_cast<FooResponse *>(response);
         auto text = *(tt->release_text());

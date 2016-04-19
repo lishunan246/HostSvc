@@ -20,7 +20,7 @@ namespace GkcHostSvc {
 
         explicit Client(asio::io_service &io_service, p_aint c, std::shared_ptr<GkcHostSvc::EchoServiceImpl> _s)
                 : socket(io_service), p(c), _service(_s) {
-            std::cout << "connecting" << std::endl;
+            std::cout << "waiting" << std::endl;
             ++(*p);
         }
 
@@ -44,7 +44,7 @@ namespace GkcHostSvc {
         void handle_request() {
 
                 auto msg=m_packed_request.unpack(read_buf);
-                MyRpcController controller;
+                RPCController controller;
                 FooResponse response;
                 auto request=m_packed_request.get_msg();
                 _service->Foo(&controller,request,&response, nullptr);
@@ -93,6 +93,7 @@ namespace GkcHostSvc {
 
         void start()
         {
+            cout<<"connecting"<<endl;
             start_read_header();
        }
     };

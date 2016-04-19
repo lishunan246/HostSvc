@@ -6,7 +6,7 @@
 #define HOSTSVC_PRCCONTROLLER_H
 #include "HostSvcCommon.h"
 
-class MyRpcController:public protobuf::RpcController
+class RPCController:public protobuf::RpcController
 {
 private:
     bool _failed=false;

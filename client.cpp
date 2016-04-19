@@ -11,7 +11,7 @@ const static std::string server("127.0.0.1");
 
 int main() {
     try {
-        MyRpcChannel rpcChannel(server,PORT);
+        Connection rpcChannel(server,PORT);
 
         EchoService_Stub echo_clt(&rpcChannel);
         FooRequest request;
@@ -19,7 +19,7 @@ int main() {
         request.set_times(1);
 
         FooResponse response;
-        MyRpcController controller;
+        RPCController controller;
         echo_clt.Foo(&controller, &request, &response,
                      google::protobuf::internal::NewCallback([]() { std::cout << "done" << std::endl; }));
         if (controller.Failed()) {
