@@ -3,138 +3,57 @@
 //
 
 #include "HostSvcCommon.h"
-#include "example.pb.h"
 #include "RPCController.h"
+#include "RPCChannel.h"
 
-using asio::ip::tcp;
-using namespace GkcHostSvc;
 const static std::string server("127.0.0.1");
 
+void get_socket_and_connection(p_socket &ps) {
+    asio::io_service io_service;
 
+    tcp::resolver resolver(io_service);
+    tcp::resolver::query query(server, PORT);
+    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
-protobuf::RpcChannel* channel;
-protobuf::RpcController* controller;
-EchoService* service;
-FooRequest request;
-FooResponse response;
+    ps = std::make_shared<tcp::socket>(io_service);
 
-class MyRpcChannel :public protobuf::RpcChannel
-{
-private:
-	p_socket _socket;
-	std::vector<char> _request,_response;
-	PackedMessage<FooRequest> pm;
-	PackedMessage<FooResponse> pr;
-public:
-	MyRpcChannel(){}
-	~MyRpcChannel(){}
-	// Call the given method of the remote service.  The signature of this
-	// procedure looks the same as Service::CallMethod(), but the requirements
-	// are less strict in one important way:  the request and response objects
-	// need not be of any specific class as long as their descriptors are
-	// method->input_type() and method->output_type().
-	virtual void CallMethod(const protobuf::MethodDescriptor* method,
-	                        protobuf::RpcController* controller,
-		const protobuf::Message* request,
-	                        protobuf::Message* response,
-	                        protobuf::Closure* done){
-
-
-
-		auto p=dynamic_cast<const FooRequest*> (request);
-		pm.set_msg(p);
-		pm.pack(_request);
-
-		asio::error_code ec;
-		asio::write(*_socket,asio::buffer(_request),ec);
-		done->Run();
-		_response.resize(HEADER_SIZE);
-		asio::read(*_socket,asio::buffer(_response),ec);
-
-		auto size=pr.decode_header(_response);
-		_response.resize(size+HEADER_SIZE);
-		asio::read(*_socket, asio::buffer(&_response[HEADER_SIZE],size),ec);
-		pr.unpack(_response);
-		auto x=pr.get_msg();
-		auto tt=const_cast<FooResponse*>(x);
-		std::cout<<*(tt->release_text())<<endl;
-	};
-	void SetSocket(p_socket p)
-	{
-		_socket=p;
-	}
-};
-
-
-void Done() {
-	delete service;
-	delete channel;
-	delete controller;
-}
-void DoSearch() {
-	// You provide classes MyRpcChannel and MyRpcController, which implement
-	// the abstract interfaces protobuf::RpcChannel and protobuf::RpcController.
-	channel = new MyRpcChannel();
-	controller = new MyRpcController();
-
-	// The protocol compiler generates the SearchService class based on the
-	// definition given above.
-	service = new EchoService::Stub(channel);
-
-	// Set up the request.
-	request.set_text("protocol buffers");
-
-	// Execute the RPC.
-	service->Foo(controller, &request, &response, protobuf::internal::NewCallback(&Done));
-}
-
-
-
-void get_socket_and_connection(p_socket& ps)
-{
-	asio::io_service io_service;
-
-	tcp::resolver resolver(io_service);
-	tcp::resolver::query query(server, PORT);
-	tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-
-	ps = std::make_shared<tcp::socket>(io_service);
-
-	asio::connect(*ps.get(), endpoint_iterator);
+    asio::connect(*ps.get(), endpoint_iterator);
 }
 
 int main() {
     try {
-	    p_socket ps;
-	    get_socket_and_connection(ps);
-		MyRpcChannel rpcChannel;
-		rpcChannel.SetSocket(ps);
-		EchoService_Stub echo_clt(&rpcChannel);
-		FooRequest request;
-		request.set_text("test1");
-		request.set_times(1);
+        p_socket ps;
+        get_socket_and_connection(ps);
+        MyRpcChannel rpcChannel;
+        rpcChannel.SetSocket(ps);
+        EchoService_Stub echo_clt(&rpcChannel);
+        FooRequest request;
+        request.set_text("test1");
+        request.set_times(1);
 
-		FooResponse response;
-		MyRpcController controller;
-		echo_clt.Foo(&controller,&request,&response, google::protobuf::internal::NewCallback([](){ std::cout<<"done"<<std::endl;}));
-		if (controller.Failed()) {
-			printf("test 1 Rpc Call Failed : %s\n", controller.ErrorText().c_str());
-		} else {
-			printf("++++++ test 1 Rpc Response is %s\n", response.text().c_str());
-		}
-		echo_clt.Foo(&controller,&request,&response, google::protobuf::internal::NewCallback([](){ std::cout<<"done"<<std::endl;}));
-		if (controller.Failed()) {
-			printf("test 1 Rpc Call Failed : %s\n", controller.ErrorText().c_str());
-		} else {
-			printf("++++++ test 1 Rpc Response is %s\n", response.text().c_str());
-		}
+        FooResponse response;
+        MyRpcController controller;
+        echo_clt.Foo(&controller, &request, &response,
+                     google::protobuf::internal::NewCallback([]() { std::cout << "done" << std::endl; }));
+        if (controller.Failed()) {
+            printf("test 1 Rpc Call Failed : %s\n", controller.ErrorText().c_str());
+        } else {
+            printf("++++++ test 1 Rpc Response is %s\n", response.text().c_str());
+        }
+        echo_clt.Foo(&controller, &request, &response,
+                     google::protobuf::internal::NewCallback([]() { std::cout << "done" << std::endl; }));
+        if (controller.Failed()) {
+            printf("test 1 Rpc Call Failed : %s\n", controller.ErrorText().c_str());
+        } else {
+            printf("++++++ test 1 Rpc Response is %s\n", response.text().c_str());
+        }
 
     }
     catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
     }
 #ifdef WIN32
-	system("pause");
+    system("pause");
 #endif
 
     return 0;

@@ -1,1 +1,2 @@
-protoc example.proto RPCRequest.proto RPCResponse.proto --cpp_out=.
+#!/usr/bin/env bash
+protoc example.proto  --cpp_out=.

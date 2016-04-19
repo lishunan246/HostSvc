@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-package GKC;
-
-message RPCResponse{
-     int32 status=1;
-     string result=2;
-}

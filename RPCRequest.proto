@@ -1,7 +1,0 @@
-syntax = "proto3";
-package GKC;
-
-message RPCRequest{
-     string functionName=1;
-     string param=2;
-}
