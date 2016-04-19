@@ -3,9 +3,8 @@
 //
 
 #include "HostSvcCommon.h"
-#include "RPCController.h"
 #include "RPCChannel.h"
-
+#include "TestObject.h"
 const static std::string server("127.0.0.1");
 
 
@@ -13,27 +12,15 @@ int main() {
     try {
         Connection rpcChannel(server,PORT);
 
-        EchoService_Stub echo_clt(&rpcChannel);
-        FooRequest request;
-        request.set_text("test1");
-        request.set_times(1);
-
-        FooResponse response;
-        RPCController controller;
-        echo_clt.Foo(&controller, &request, &response,
-                     google::protobuf::internal::NewCallback([]() { std::cout << "done" << std::endl; }));
-        if (controller.Failed()) {
-            printf("test 1 Rpc Call Failed : %s\n", controller.ErrorText().c_str());
-        } else {
-            printf("++++++ test 1 Rpc Response is %s\n", response.text().c_str());
-        }
-        echo_clt.Foo(&controller, &request, &response,
-                     google::protobuf::internal::NewCallback([]() { std::cout << "done" << std::endl; }));
-        if (controller.Failed()) {
-            printf("test 1 Rpc Call Failed : %s\n", controller.ErrorText().c_str());
-        } else {
-            printf("++++++ test 1 Rpc Response is %s\n", response.text().c_str());
-        }
+        ProxyObject counter(&rpcChannel,1);
+        counter.add(100);
+        counter.sub(10);
+        ProxyObject counter2(&rpcChannel,3);
+        counter2.sub(133);
+        std::cout<<"result 2: ";
+        std::cout<<counter2.getCount()<<std::endl;
+        std::cout<<"result: ";
+        std::cout<<counter.getCount()<<std::endl;
 
     }
     catch (std::exception &e) {

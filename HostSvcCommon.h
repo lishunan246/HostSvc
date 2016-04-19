@@ -23,53 +23,20 @@
 #include <atomic>
 #include <utility>
 
-//#include "RPCRequest.pb.h"
-//#include "RPCResponse.pb.h"
 #include "packedmessage.h"
 #include "example.pb.h"
+
 
 using namespace google;
 namespace GkcHostSvc {
 	using asio::ip::tcp;
 	using namespace std;
-//	using Request = GKC::RPCRequest;
-//	using Response = GKC::RPCResponse;
+
     static const int PORT_INT(10000);
     static const std::string PORT("10000");
 	using a_int = std::atomic<int>;
 	using p_aint = std::shared_ptr<a_int>;
 	using p_socket = std::shared_ptr<asio::ip::tcp::socket>;
-
-	class EchoServiceImpl : public EchoService {
-
-	public:
-
-		EchoServiceImpl() {}
-
-		virtual void Foo(::google::protobuf::RpcController* controller,
-
-						 const ::FooRequest* request,
-
-						 ::FooResponse* response,
-
-						 ::google::protobuf::Closure* done) {
-			std::cout<<" str:"<<std::endl;
-			std::string str = request->text();
-			std::cout<<" str:"<<str<<std::endl;
-
-			std::string tmp = str;
-
-			for (int i = 1; i < request->times(); i++)
-
-				str += (" " + tmp);
-
-			response->set_text(str);
-
-			response->set_result(true);
-
-		}
-
-	};
 }
 
 #endif //HOSTSVC_HOSTSVCCOMMON_H

@@ -1,14 +1,12 @@
-
+syntax = "proto2";
 option cc_generic_services = true;
-
-
 
 message FooRequest {
 
 	required string text = 1;
 
 	optional int32 times = 2;
-
+    optional int32 clientID=3;
 }
 
 
@@ -21,6 +19,23 @@ message FooResponse {
 	optional bool result = 2;
 
     optional int32 clientID=3;
+
+}
+
+message RPCRequest
+{
+    optional int32 clientID=1;
+    optional int32 object =2;
+    optional string method = 3;
+    optional int32 param=4;
+}
+
+
+
+message RPCResponse {
+    optional int32 clientID=1;
+    optional bool success=2;
+    optional int32 result=3;
 }
 
 
@@ -28,6 +43,6 @@ message FooResponse {
 service EchoService {
 
 	rpc Foo(FooRequest) returns(FooResponse);
-
+    rpc RPC(RPCRequest) returns(RPCResponse);
 }
 

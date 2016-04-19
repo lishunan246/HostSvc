@@ -1,28 +1,27 @@
 #include "HostSvcCommon.h"
 #include "example.pb.h"
 #include "RPCController.h"
+#include "ServiceImpl.h"
 
 namespace GkcHostSvc {
     class Client : public std::enable_shared_from_this<Client> {
-        tcp::socket socket;
-        std::vector<char> read_buf,write_buf;
-        p_aint p;
+        tcp::socket _socket;
+        std::vector<char> _read_buf,_write_buf;
+        p_aint _pCounter;
         std::shared_ptr<GkcHostSvc::EchoServiceImpl> _service;
-        PackedMessage<FooRequest> m_packed_request;
-        int id;
+        PackedMessage<RPCRequest> _packedRequest;
+        PackedMessage<RPCResponse> _packedResponse;
+        int _id;
     public:
-
         using pClient = std::shared_ptr<Client>;
 
-
         Client &operator=(const Client &) = delete;
-
         Client &operator=(Client &&) = default;
 
         explicit Client(asio::io_service &io_service, p_aint c, std::shared_ptr<GkcHostSvc::EchoServiceImpl> _s)
-                : socket(io_service), p(c), _service(_s) {
+                : _socket(io_service), _pCounter(c), _service(_s) {
             std::cout << " waiting" << std::endl;
-            ++(*p);
+            ++(*_pCounter);
         }
 
         Client(const Client &) = delete;
@@ -30,8 +29,8 @@ namespace GkcHostSvc {
         Client(Client &&) = default;
 
         ~Client() {
-            --*p;
-            std::cout << id<<"disconnecting" << std::endl;
+            --*_pCounter;
+            std::cout << _id<<"disconnecting" << std::endl;
         }
 
         static pClient create(asio::io_service &io_service, p_aint p, std::shared_ptr<GkcHostSvc::EchoServiceImpl> _s) {
@@ -39,25 +38,26 @@ namespace GkcHostSvc {
         }
 
         tcp::socket &getSocket() {
-            return socket;
+            return _socket;
         }
 
         void setID(int x)
         {
-            id=x;
+            _id=x;
         }
 
         void handle_request() {
 
-                auto msg=m_packed_request.unpack(read_buf);
+                auto msg=_packedRequest.unpack(_read_buf);
                 RPCController controller;
-                FooResponse response;
-                auto request=m_packed_request.get_msg();
-                _service->Foo(&controller,request,&response, nullptr);
-                PackedMessage<FooResponse> p;
-                p.set_msg(&response);
-                p.pack(write_buf);
-                asio::write(socket, asio::buffer(write_buf));
+                RPCResponse response;
+                response.set_clientid(_id);
+                auto request=_packedRequest.get_msg();
+                _service->RPC(&controller,request,&response, nullptr);
+
+                _packedResponse.set_msg(&response);
+                _packedResponse.pack(_write_buf);
+                asio::write(_socket, asio::buffer(_write_buf));
 
         }
 
@@ -70,9 +70,9 @@ namespace GkcHostSvc {
         };
 
         void start_read_body(unsigned msg_len) {
-            read_buf.resize(HEADER_SIZE+msg_len);
+            _read_buf.resize(HEADER_SIZE+msg_len);
             auto self(shared_from_this());
-            asio::async_read(socket, asio::buffer(&read_buf[HEADER_SIZE],msg_len),
+            asio::async_read(_socket, asio::buffer(&_read_buf[HEADER_SIZE],msg_len),
                              [self](const asio::error_code &ec, std::size_t bytes_transferred) {
                                  self->handle_read_body(ec);
                              });
@@ -81,16 +81,16 @@ namespace GkcHostSvc {
         void handle_read_header(const asio::error_code &ec) {
 
             if (!ec) {
-                unsigned msg_len = m_packed_request.decode_header(read_buf);
+                unsigned msg_len = _packedRequest.decode_header(_read_buf);
 
                 start_read_body(msg_len);
             }
         };
 
         void start_read_header() {
-            read_buf.resize(HEADER_SIZE);
+            _read_buf.resize(HEADER_SIZE);
             auto self(shared_from_this());
-            asio::async_read(socket, asio::buffer(read_buf),
+            asio::async_read(_socket, asio::buffer(_read_buf),
                              [self](const asio::error_code &ec, std::size_t bytes_transferred) {
                                  self->handle_read_header(ec);
                              });
@@ -99,7 +99,7 @@ namespace GkcHostSvc {
 
         void start()
         {
-            cout<<id<<" connecting"<<endl;
+            cout<<_id<<" connecting"<<endl;
             start_read_header();
        }
     };

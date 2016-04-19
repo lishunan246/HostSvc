@@ -56,10 +56,20 @@ public:
         return size;
     }
 
+    void setClientID(int x)
+    {
+        clientID=x;
+    }
+    void getClinetID()
+    {
+        return clientID;
+    }
+
 
 private:
     T *m_msg;
     T m;
+    int clientID;
 };
 
 #endif 
