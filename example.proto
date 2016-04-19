@@ -15,10 +15,12 @@ message FooRequest {
 
 message FooResponse {
 
+
 	required string text = 1;
 
 	optional bool result = 2;
 
+    optional int32 clientID=3;
 }
 
 

@@ -6,9 +6,11 @@ namespace GkcHostSvc
 		tcp::acceptor acceptor;
 		p_aint pCount = std::make_shared<a_int>(0);
 		std::shared_ptr<GkcHostSvc::EchoServiceImpl> _s;
-
+		atomic<int> clientCount;
 	public:
-		explicit ClientManager(asio::io_service &io_service) : acceptor(io_service, tcp::endpoint(tcp::v4(), PORT_INT)) {}
+		explicit ClientManager(asio::io_service &io_service) : acceptor(io_service, tcp::endpoint(tcp::v4(), PORT_INT)) {
+			clientCount=0;
+		}
 		ClientManager(const ClientManager&) = delete;
 		ClientManager(ClientManager&&) = default;
 		ClientManager& operator=(const ClientManager&) = delete;
@@ -27,7 +29,8 @@ namespace GkcHostSvc
 
 	void ClientManager::start_accept() {
 		auto newClient = Client::create(acceptor.get_io_service(), pCount,_s);
-
+		newClient->setID(clientCount);
+		++clientCount;
 		acceptor.async_accept(newClient->getSocket(), [this, newClient](const asio::error_code &ec) {
 
 			this->handle_accept(newClient, ec);

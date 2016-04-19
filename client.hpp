@@ -9,6 +9,7 @@ namespace GkcHostSvc {
         p_aint p;
         std::shared_ptr<GkcHostSvc::EchoServiceImpl> _service;
         PackedMessage<FooRequest> m_packed_request;
+        int id;
     public:
 
         using pClient = std::shared_ptr<Client>;
@@ -20,7 +21,7 @@ namespace GkcHostSvc {
 
         explicit Client(asio::io_service &io_service, p_aint c, std::shared_ptr<GkcHostSvc::EchoServiceImpl> _s)
                 : socket(io_service), p(c), _service(_s) {
-            std::cout << "waiting" << std::endl;
+            std::cout << " waiting" << std::endl;
             ++(*p);
         }
 
@@ -30,7 +31,7 @@ namespace GkcHostSvc {
 
         ~Client() {
             --*p;
-            std::cout << "disconnecting" << std::endl;
+            std::cout << id<<"disconnecting" << std::endl;
         }
 
         static pClient create(asio::io_service &io_service, p_aint p, std::shared_ptr<GkcHostSvc::EchoServiceImpl> _s) {
@@ -39,6 +40,11 @@ namespace GkcHostSvc {
 
         tcp::socket &getSocket() {
             return socket;
+        }
+
+        void setID(int x)
+        {
+            id=x;
         }
 
         void handle_request() {
@@ -93,7 +99,7 @@ namespace GkcHostSvc {
 
         void start()
         {
-            cout<<"connecting"<<endl;
+            cout<<id<<" connecting"<<endl;
             start_read_header();
        }
     };
