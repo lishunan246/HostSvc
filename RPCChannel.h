@@ -11,12 +11,20 @@ using namespace GkcHostSvc;
 
 class MyRpcChannel : public protobuf::RpcChannel {
 private:
-    p_socket _socket;
+    asio::io_service io_service;
+    tcp::resolver resolver;
+    tcp::resolver::query query;
+    tcp::resolver::iterator endpoint_iterator;
+    tcp::socket _soc;
+    //p_socket _socket;
     std::vector<char> _request, _response;
     PackedMessage<FooRequest> pm;
     PackedMessage<FooResponse> pr;
 public:
-    MyRpcChannel() { }
+    MyRpcChannel(const string& server,const string& PORT) :resolver(io_service),query(server, PORT),endpoint_iterator(resolver.resolve(query)),_soc(io_service)
+    {
+        asio::connect(_soc, endpoint_iterator);
+    }
 
     ~MyRpcChannel() { }
 
@@ -37,14 +45,14 @@ public:
         pm.pack(_request);
 
         asio::error_code ec;
-        asio::write(*_socket, asio::buffer(_request), ec);
+        asio::write(_soc,asio::buffer(_request), ec);
         done->Run();
         _response.resize(HEADER_SIZE);
-        asio::read(*_socket, asio::buffer(_response), ec);
+        asio::read(_soc, asio::buffer(_response), ec);
 
         auto size = pr.decode_header(_response);
         _response.resize(size + HEADER_SIZE);
-        asio::read(*_socket, asio::buffer(&_response[HEADER_SIZE], size), ec);
+        asio::read(_soc, asio::buffer(&_response[HEADER_SIZE], size), ec);
         pr.unpack(_response);
         auto x = pr.get_msg();
         auto tt = const_cast<FooResponse *>(x);
@@ -53,10 +61,6 @@ public:
         xx->set_text(text);
         xx->set_result(tt->result());
     };
-
-    void SetSocket(p_socket p) {
-        _socket = p;
-    }
 };
 
 #endif //HOSTSVC_RPCCHANNEL_H

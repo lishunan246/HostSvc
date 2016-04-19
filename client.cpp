@@ -11,20 +11,8 @@ const static std::string server("127.0.0.1");
 
 int main() {
     try {
-        p_socket ps;
+        MyRpcChannel rpcChannel(server,PORT);
 
-        asio::io_service io_service;
-
-        tcp::resolver resolver(io_service);
-        tcp::resolver::query query(server, PORT);
-        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-
-        ps = std::make_shared<tcp::socket>(io_service);
-
-        asio::connect(*ps.get(), endpoint_iterator);
-        //get_socket_and_connection(ps);
-        MyRpcChannel rpcChannel;
-        rpcChannel.SetSocket(ps);
         EchoService_Stub echo_clt(&rpcChannel);
         FooRequest request;
         request.set_text("test1");
