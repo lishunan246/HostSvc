@@ -23,6 +23,8 @@ class MyRpcChannel :public protobuf::RpcChannel
 private:
 	p_socket _socket;
 	std::vector<char> _request,_response;
+	PackedMessage<FooRequest> pm;
+	PackedMessage<FooResponse> pr;
 public:
 	MyRpcChannel(){}
 	~MyRpcChannel(){}
@@ -38,7 +40,7 @@ public:
 	                        protobuf::Closure* done){
 
 
-		PackedMessage<FooRequest> pm;
+
 		auto p=dynamic_cast<const FooRequest*> (request);
 		pm.set_msg(p);
 		pm.pack(_request);
@@ -48,17 +50,14 @@ public:
 		done->Run();
 		_response.resize(HEADER_SIZE);
 		asio::read(*_socket,asio::buffer(_response),ec);
-		PackedMessage<FooResponse> pr;
+
 		auto size=pr.decode_header(_response);
 		_response.resize(size+HEADER_SIZE);
 		asio::read(*_socket, asio::buffer(&_response[HEADER_SIZE],size),ec);
 		pr.unpack(_response);
 		auto x=pr.get_msg();
-		response=const_cast<FooResponse*>(x);
-//		asio::async_write(*_socket,asio::buffer(_request),[&done](const asio::error_code& ec, std::size_t bytes_transferred)
-//		{
-//			done->Run();
-//		});
+		auto tt=const_cast<FooResponse*>(x);
+		std::cout<<*(tt->release_text())<<endl;
 	};
 	void SetSocket(p_socket p)
 	{
@@ -123,8 +122,13 @@ int main() {
 		} else {
 			printf("++++++ test 1 Rpc Response is %s\n", response.text().c_str());
 		}
+		echo_clt.Foo(&controller,&request,&response, google::protobuf::internal::NewCallback([](){ std::cout<<"done"<<std::endl;}));
+		if (controller.Failed()) {
+			printf("test 1 Rpc Call Failed : %s\n", controller.ErrorText().c_str());
+		} else {
+			printf("++++++ test 1 Rpc Response is %s\n", response.text().c_str());
+		}
 
-	    
     }
     catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
