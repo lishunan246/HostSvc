@@ -27,7 +27,9 @@ message RPCRequest
     optional int32 clientID=1;
     optional int32 object =2;
     optional string method = 3;
-    optional int32 param=4;
+    optional int32 paramInt=4;
+    optional string paramString=5;
+    optional bool paramBool=6;
 }
 
 
@@ -35,7 +37,9 @@ message RPCRequest
 message RPCResponse {
     optional int32 clientID=1;
     optional bool success=2;
-    optional int32 result=3;
+    optional int32 resultInt=3;
+    optional string resultString=4;
+    optional bool resultBool=5;
 }
 
 

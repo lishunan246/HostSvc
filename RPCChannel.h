@@ -58,9 +58,10 @@ public:
 
         auto pLocalResponse = static_cast<RPCResponse *>(response);
 
-        pLocalResponse->set_success(true);
-        pLocalResponse->set_result(pResponse->result());
-        pLocalResponse->set_clientid(pResponse->clientid());
+        *pLocalResponse=*pResponse;
+//        pLocalResponse->set_success(true);
+//        pLocalResponse->set_resultint(pResponse->resultint());
+//        pLocalResponse->set_clientid(pResponse->clientid());
         if(done!= nullptr)
             done->Run();
     };

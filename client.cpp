@@ -15,14 +15,17 @@ int main()
         Connection rpcChannel(server,PORT);
 
         ProxyObject counter(&rpcChannel,1);
+        ProxyStringObject string(&rpcChannel,2);
         counter.add(100);
         counter.sub(10);
+        string.append("1232");
         ProxyObject counter2(&rpcChannel,3);
         counter2.sub(133);
         std::cout<<"id : "<<rpcChannel.getClientID()<<endl<<"result 2: ";
         std::cout<<counter2.getCount()<<std::endl;
         std::cout<<"id : "<<rpcChannel.getClientID()<<endl<<"result: ";
         std::cout<<counter.getCount()<<std::endl;
+        std::cout<<"string: "<<string.get()<<endl;
 
     }
     catch (std::exception &e) {
