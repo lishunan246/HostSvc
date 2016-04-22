@@ -23,8 +23,7 @@ namespace GkcHostSvc {
         virtual void RPC(RPCController *controller, const RPCRequest *rpcRequest, RPCResponse *response,
                          ::protobuf::Closure *done) {
             auto ob = rpcRequest->object();
-            auto clinetid = rpcRequest->clientid();
-            response->set_clientid(clinetid);
+
             std::shared_ptr<RealObject> p;
             if (ob == 0) {
                 if (rpcRequest->method() == "new") {

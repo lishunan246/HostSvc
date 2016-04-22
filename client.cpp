@@ -19,9 +19,9 @@ int main()
         counter.sub(10);
         ProxyObject counter2(&rpcChannel,3);
         counter2.sub(133);
-        std::cout<<"result 2: ";
+        std::cout<<"id : "<<rpcChannel.getClientID()<<endl<<"result 2: ";
         std::cout<<counter2.getCount()<<std::endl;
-        std::cout<<"result: ";
+        std::cout<<"id : "<<rpcChannel.getClientID()<<endl<<"result: ";
         std::cout<<counter.getCount()<<std::endl;
 
     }
@@ -31,6 +31,6 @@ int main()
 #ifdef WIN32
     system("pause");
 #endif
-    
+
     return 0;
 }
