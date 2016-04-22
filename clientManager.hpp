@@ -1,48 +1,47 @@
 #include "HostSvcCommon.h"
 #include "client.hpp"
-namespace GkcHostSvc
-{
-	class ClientManager {
-		tcp::acceptor acceptor;
-		p_aint pCount = std::make_shared<a_int>(0);
-		std::shared_ptr<GkcHostSvc::EchoServiceImpl> _s;
-		atomic<int> clientCount;
-	public:
-		explicit ClientManager(asio::io_service &io_service) : acceptor(io_service, tcp::endpoint(tcp::v4(), PORT_INT)) {
-			clientCount=0;
-		}
-		ClientManager(const ClientManager&) = delete;
-		ClientManager(ClientManager&&) = default;
-		ClientManager& operator=(const ClientManager&) = delete;
-		ClientManager& operator=(ClientManager&&) = default;
 
-		void start_accept();
+namespace GkcHostSvc {
+        class ClientManager {
+        tcp::acceptor _acceptor;
+        p_aint pCount = std::make_shared<a_int>(0);
+        pService _s;
+        atomic<int> clientCount;
+    public:
+        explicit ClientManager(asio::io_service &io_service) : _acceptor(io_service,
+                                                                        tcp::endpoint(tcp::v4(), PORT_INT)) {
+            clientCount = 0;
+        }
 
-		void handle_accept(Client::pClient pClient, const asio::error_code &errorCode);
-		bool registerService(std::shared_ptr<GkcHostSvc::EchoServiceImpl> s)
-		{
-			_s=s;
-			return true;
-		}
+        ClientManager(const ClientManager &) = delete;
 
-	};
+        ClientManager(ClientManager &&) = default;
 
-	void ClientManager::start_accept() {
-		auto newClient = Client::create(acceptor.get_io_service(), pCount,_s);
-		newClient->setID(clientCount);
-		++clientCount;
-		acceptor.async_accept(newClient->getSocket(), [this, newClient](const asio::error_code &ec) {
+        ClientManager &operator=(const ClientManager &) = delete;
 
-			this->handle_accept(newClient, ec);
-		});
-	}
+        ClientManager &operator=(ClientManager &&) = default;
 
-	void ClientManager::handle_accept(Client::pClient pClient, const asio::error_code &errorCode) {
-		std::cout << *pCount << std::endl;
+        void handle_accept(Client::pClient pClient, const asio::error_code &errorCode) {
+            std::cout << *pCount << std::endl;
 
-		if (!errorCode)
-			pClient->start();
+            if (!errorCode)
+                pClient->start();
 
-		start_accept();
-	}
+            start_accept();
+        }
+
+        bool registerService(pService s) {
+            _s = s;
+            return true;
+        }
+
+        void start_accept() {
+            auto newClient = Client::create(_acceptor.get_io_service(), pCount, _s);
+            newClient->setID(clientCount);
+            ++clientCount;
+            _acceptor.async_accept(newClient->getSocket(), [this, newClient](const asio::error_code &ec) {
+                this->handle_accept(newClient, ec);
+            });
+        }
+    };
 }

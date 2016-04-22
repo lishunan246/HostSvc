@@ -7,93 +7,98 @@
 
 #include "RPCChannel.h"
 #include "RPCController.h"
-class TestObject
-{
-public:
-    virtual void add(int n)=0;
-    virtual void sub(int n)=0;
-    virtual int getCount()=0;
-};
 
-class RealObject: public TestObject
-{
-private:
-    int _count=0;
-public:
-    void add(int n)
-    {
-        _count+=n;
-    }
-    void sub(int n)
-    {
-        _count-=n;
-    }
-    int getCount()
-    {
-        return _count;
-    }
-};
+namespace GkcHostSvc {
+    class TestObject {
+    public:
+        virtual void add(int n) = 0;
 
-class ProxyObject:public TestObject
-{
-    Connection* _rpcChannel;
-    EchoService_Stub echo_clt;
-    RPCRequest request;
-    RPCResponse response;
-    RPCController controller;
-    int _name;
-public:
-    ProxyObject(Connection* rpcChannel,const int name):_rpcChannel(rpcChannel),echo_clt(rpcChannel),_name(name)
-    {
-        request.set_clientid(_rpcChannel->getClientID());
-        request.set_object(0);
-        request.set_method("new");
-        request.set_param(_name);
+        virtual void sub(int n) = 0;
 
-        echo_clt.RPC(&controller, &request, &response, nullptr);
+        virtual int getCount() = 0;
+    };
 
-    }
-    void add(int n)
-    {
-        request.set_clientid(_rpcChannel->getClientID());
-        request.set_object(_name);
-        request.set_method("add");
-        request.set_param(n);
+    class RealObject : public TestObject {
+    private:
+        int _count = 0;
+    public:
+        void add(int n) {
+            _count += n;
+        }
 
-        echo_clt.RPC(&controller, &request, &response, nullptr);
+        void sub(int n) {
+            _count -= n;
+        }
 
-    }
-    void sub(int n)
-    {
-        request.set_clientid(_rpcChannel->getClientID());
-        request.set_object(_name);
-        request.set_method("sub");
-        request.set_param(n);
+        int getCount() {
+            return _count;
+        }
+    };
 
-        echo_clt.RPC(&controller, &request, &response, nullptr);
+    class ProxyObject : public TestObject {
+    private:
+        Connection *_rpcChannel;
+        EchoService_Stub _service;
+        RPCRequest _request;
+        RPCResponse _response;
+        RPCController _controller;
+        int _name;
+    public:
+        ProxyObject(Connection *rpcChannel, const int name) : _rpcChannel(rpcChannel), _service(rpcChannel),
+                                                              _name(name) {
+            _request.set_clientid(_rpcChannel->getClientID());
+            _request.set_object(0);
+            _request.set_method("new");
+            _request.set_param(_name);
 
-    }
-    int getCount()
-    {
-        request.set_clientid(_rpcChannel->getClientID());
-        request.set_object(_name);
-        request.set_method("getCount");
-        request.set_param(0);
+            _service.RPC(&_controller, &_request, &_response, nullptr);
 
-        echo_clt.RPC(&controller, &request, &response, nullptr);
+        }
 
-        return response.result();
-    }
-    ~ProxyObject()
-    {
-        request.set_clientid(_rpcChannel->getClientID());
-        request.set_object(0);
-        request.set_method("delete");
-        request.set_param(_name);
+        void add(int n) {
+            _request.set_clientid(_rpcChannel->getClientID());
+            _request.set_object(_name);
+            _request.set_method("add");
+            _request.set_param(n);
 
-        echo_clt.RPC(&controller, &request, &response, nullptr);
-    }
-};
+            _service.RPC(&_controller, &_request, &_response, nullptr);
+
+        }
+
+        void sub(int n) {
+            _request.set_clientid(_rpcChannel->getClientID());
+            _request.set_object(_name);
+            _request.set_method("sub");
+            _request.set_param(n);
+
+            _service.RPC(&_controller, &_request, &_response, nullptr);
+
+        }
+
+        int getCount() {
+            _request.set_clientid(_rpcChannel->getClientID());
+            _request.set_object(_name);
+            _request.set_method("getCount");
+            _request.set_param(0);
+
+            _service.RPC(&_controller, &_request, &_response, nullptr);
+
+            return _response.result();
+        }
+
+        ~ProxyObject() {
+            _request.set_clientid(_rpcChannel->getClientID());
+            _request.set_object(0);
+            _request.set_method("delete");
+            _request.set_param(_name);
+
+            _service.RPC(&_controller, &_request, &_response, nullptr);
+        }
+    };
+
+    using ObjectMap=std::map<int, shared_ptr<RealObject>>;
+    using pObjectMap=std::shared_ptr<ObjectMap>;
+}
 
 
 #endif //HOSTSVC_TESTOBJECT_H

@@ -74,7 +74,7 @@ public:
     // has already been canceled when NotifyOnCancel() is called, the callback
     // will be called immediately.
     //
-    // NotifyOnCancel() must be called no more than once per request.
+    // NotifyOnCancel() must be called no more than once per _request.
     void NotifyOnCancel(protobuf::Closure* callback) {};
 };
 

@@ -12,9 +12,8 @@ namespace GkcHostSvc {
         PackedMessage<RPCRequest> _packedRequest;
         PackedMessage<RPCResponse> _packedResponse;
         int _id;
-        using ObjectMap=std::map<int, shared_ptr<RealObject>>;
-        using pObjectMap=std::shared_ptr<ObjectMap >;
-        ObjectMap _ObjectMap;
+
+        pObjectMap _ObjectMap=std::make_shared<ObjectMap>();
     public:
         using pClient = std::shared_ptr<Client>;
 
@@ -25,6 +24,7 @@ namespace GkcHostSvc {
                 : _socket(io_service), _pCounter(c), _service(_s) {
             std::cout << " waiting" << std::endl;
             ++(*_pCounter);
+            _s->setMap(_ObjectMap);
         }
 
         Client(const Client &) = delete;
@@ -36,7 +36,7 @@ namespace GkcHostSvc {
             std::cout << _id<<"disconnecting" << std::endl;
         }
 
-        static pClient create(asio::io_service &io_service, p_aint p, std::shared_ptr<GkcHostSvc::EchoServiceImpl> _s) {
+        static pClient create(asio::io_service &io_service, p_aint p, pService _s) {
             return std::make_shared<Client>(io_service, p, _s);
         }
 

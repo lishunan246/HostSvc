@@ -5,10 +5,12 @@
 #include "HostSvcCommon.h"
 #include "RPCChannel.h"
 #include "TestObject.h"
+
 const static std::string server("127.0.0.1");
 
 
-int main() {
+int main()
+{
     try {
         Connection rpcChannel(server,PORT);
 
@@ -29,6 +31,6 @@ int main() {
 #ifdef WIN32
     system("pause");
 #endif
-
+    
     return 0;
 }
