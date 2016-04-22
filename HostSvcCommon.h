@@ -5,6 +5,7 @@
 #ifndef HOSTSVC_HOSTSVCCOMMON_H
 #define HOSTSVC_HOSTSVCCOMMON_H
 
+#ifdef _MSC_VER
 #define ASIO_STANDALONE
 #define ASIO_HAS_STD_ADDRESSOF
 #define ASIO_HAS_STD_ARRAY
@@ -13,7 +14,6 @@
 #define ASIO_HAS_STD_TYPE_TRAITS
 #define ASIO_NO_TYPEID
 
-#ifdef _MSC_VER
 #pragma comment(linker, "/SUBSYSTEM:CONSOLE")
 #endif
 
@@ -26,17 +26,16 @@
 #include "packedmessage.h"
 #include "example.pb.h"
 
-
-using namespace google;
 namespace GkcHostSvc {
 	using asio::ip::tcp;
 	using namespace std;
-
+	using namespace google;
     static const int PORT_INT(10000);
     static const std::string PORT("10000");
-	using a_int = std::atomic<int>;
-	using p_aint = std::shared_ptr<a_int>;
-	using p_socket = std::shared_ptr<asio::ip::tcp::socket>;
+
+	using atomicInt = std::atomic<int>;
+	using pAtomicInt = std::shared_ptr<atomicInt>;
+	using pSocket = std::shared_ptr<asio::ip::tcp::socket>;
 
 }
 

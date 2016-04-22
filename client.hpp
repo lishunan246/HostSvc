@@ -7,8 +7,8 @@ namespace GkcHostSvc {
     class Client : public std::enable_shared_from_this<Client> {
         tcp::socket _socket;
         std::vector<char> _read_buf,_write_buf;
-        p_aint _pCounter;
-        std::shared_ptr<GkcHostSvc::EchoServiceImpl> _service;
+        pAtomicInt _pCounter;
+        pService _service;
         PackedMessage<RPCRequest> _packedRequest;
         PackedMessage<RPCResponse> _packedResponse;
         int _id;
@@ -20,7 +20,7 @@ namespace GkcHostSvc {
         Client &operator=(const Client &) = delete;
         Client &operator=(Client &&) = default;
 
-        explicit Client(asio::io_service &io_service, p_aint c, std::shared_ptr<GkcHostSvc::EchoServiceImpl> _s)
+        explicit Client(asio::io_service &io_service, pAtomicInt c, pService _s)
                 : _socket(io_service), _pCounter(c), _service(_s) {
             std::cout << " waiting" << std::endl;
             ++(*_pCounter);
@@ -36,7 +36,7 @@ namespace GkcHostSvc {
             std::cout << _id<<"disconnecting" << std::endl;
         }
 
-        static pClient create(asio::io_service &io_service, p_aint p, pService _s) {
+        static pClient create(asio::io_service &io_service, pAtomicInt p, pService _s) {
             return std::make_shared<Client>(io_service, p, _s);
         }
 

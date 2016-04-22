@@ -4,7 +4,7 @@
 namespace GkcHostSvc {
         class ClientManager {
         tcp::acceptor _acceptor;
-        p_aint pCount = std::make_shared<a_int>(0);
+        pAtomicInt pCount = std::make_shared<atomicInt>(0);
         pService _s;
         atomic<int> clientCount;
     public:
