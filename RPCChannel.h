@@ -20,7 +20,7 @@ private:
     std::vector<char> _request, _response;
     PackedMessage<RPCRequest> _packedRequest;
     PackedMessage<RPCResponse> _packedResponse;
-    int clientID=-1;
+    int _clientID=-1;
 public:
     Connection(const string& server,const string& PORT) :_resolver(_io_service),_query(server, PORT),_endpoint_iterator(_resolver.resolve(_query)),_socket(_io_service)
     {
@@ -29,7 +29,7 @@ public:
 
     int getClientID()
     {
-        return clientID;
+        return _clientID;
     }
 
 
@@ -60,7 +60,7 @@ public:
         _packedResponse.unpack(_response);
         auto pResponse = const_cast<RPCResponse *>(_packedResponse.get_msg());
         //auto text = *(pResponse->());
-        clientID=pResponse->clientid();
+        _clientID=pResponse->clientid();
 
         auto pLocalResponse = static_cast<RPCResponse *>(response);
 

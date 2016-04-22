@@ -12,6 +12,9 @@ namespace GkcHostSvc {
         PackedMessage<RPCRequest> _packedRequest;
         PackedMessage<RPCResponse> _packedResponse;
         int _id;
+        using ObjectMap=std::map<int, shared_ptr<RealObject>>;
+        using pObjectMap=std::shared_ptr<ObjectMap >;
+        ObjectMap _ObjectMap;
     public:
         using pClient = std::shared_ptr<Client>;
 

@@ -54,6 +54,11 @@ namespace GkcHostSvc {
                         response->set_success(true);
 
                 }
+                else if(rpcRequest->method()=="delete")
+                {
+                    ObjectMap.erase(rpcRequest->param());
+                    response->set_success(true);
+                }
             }
             else if(p=ObjectMap[ob])
             {
@@ -65,7 +70,7 @@ namespace GkcHostSvc {
                 else if(rpcRequest->method()=="sub")
                 {
                     p->sub(rpcRequest->param());
-                    response->set_success(false);
+                    response->set_success(true);
                 }
                 else if(rpcRequest->method()=="getCount")
                 {
