@@ -23,7 +23,7 @@
 #include <atomic>
 #include <utility>
 
-#include "packedmessage.h"
+#include "packedmessage.hpp"
 #include "example.pb.h"
 
 namespace GkcHostSvc {

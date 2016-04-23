@@ -1,4 +1,4 @@
-#include "HostSvcCommon.h"
+#include "HostSvcCommon.hpp"
 #include "client.hpp"
 
 namespace GkcHostSvc {

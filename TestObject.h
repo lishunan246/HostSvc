@@ -5,81 +5,55 @@
 #ifndef HOSTSVC_TESTOBJECT_H
 #define HOSTSVC_TESTOBJECT_H
 
-#include "RPCChannel.h"
-#include "RPCController.h"
+#include "RPCChannel.hpp"
+#include "RPCController.hpp"
+#include "RealObjectBase.hpp"
+#include "ProxyObjectBase.hpp"
 
-namespace GkcHostSvc
-{
-    class RealObjectBase
-    {
-    private:
-        string _type;
+namespace GkcHostSvc {
+
+
+    class TestStringObject {
+    protected:
+        static const string _type;
     public:
-        virtual ~RealObjectBase() {}
-        const string &get_type() const {
-            return _type;
-        }
+        virtual void append(const std::string &s) = 0;
 
-        void set_type(const string &_type) {
-            RealObjectBase::_type = _type;
-        }
+        virtual void clear() = 0;
+
+        virtual const std::string &get() = 0;
     };
 
+    const string  TestStringObject::_type = "string";
 
-    class TestStringObject
-    {
-    public:
-        virtual void append(const std::string& s)=0;
-        virtual void clear()=0;
-        virtual const std::string& get()=0;
-    };
-
-    class RealStringObject:public TestStringObject,public RealObjectBase
-    {
+    class RealStringObject : public TestStringObject, public RealObjectBase {
     private:
         std::string _string;
 
     public:
-        RealStringObject()
-        {
-            set_type("string");
+        RealStringObject() {
+            RealObjectBase::_type = TestStringObject::_type;
         }
-        void append(const string& s) override
-        {
-            _string+=s;
+
+        void append(const string &s) override {
+            _string += s;
         }
-        void clear() override
-        {
-            _string="";
+
+        void clear() override {
+            _string = "";
         }
-        const string& get() override
-        {
+
+        const string &get() override {
             return _string;
         }
     };
 
-    class ProxyStringObject:public TestStringObject
-    {
-    private:
-        Connection *_rpcChannel;
-        EchoService_Stub _service;
-        RPCRequest _request;
-        RPCResponse _response;
-        RPCController _controller;
-        int _name;
+    class ProxyStringObject : public TestStringObject, public ProxyObjectBase {
     public:
-        ProxyStringObject(Connection *rpcChannel, const int name) : _rpcChannel(rpcChannel), _service(rpcChannel),
-        _name(name) {
-            _request.set_clientid(_rpcChannel->getClientID());
-            _request.set_object(0);
-            _request.set_method("new");
-            _request.set_paramint(_name);
-            _request.set_paramstring("string");
-            _service.RPC(&_controller, &_request, &_response, nullptr);
+        ProxyStringObject(Connection *rpcChannel, const int name) : ProxyObjectBase(rpcChannel, name,
+                                                                                    TestStringObject::_type) {}
 
-        }
-
-        void append(const string& s) override {
+        void append(const string &s) override {
             _request.set_clientid(_rpcChannel->getClientID());
             _request.set_object(_name);
             _request.set_method("append");
@@ -97,7 +71,7 @@ namespace GkcHostSvc
 
         }
 
-        const string& get() override {
+        const string &get() override {
             _request.set_clientid(_rpcChannel->getClientID());
             _request.set_object(_name);
             _request.set_method("get");
@@ -107,21 +81,12 @@ namespace GkcHostSvc
 
             return _response.resultstring();
         }
-
-        ~ProxyStringObject()
-        {
-            _request.set_clientid(_rpcChannel->getClientID());
-            _request.set_object(0);
-            _request.set_method("delete");
-            _request.set_paramint(_name);
-
-            _service.RPC(&_controller, &_request, &_response, nullptr);
-        }
     };
 
 
-
     class TestObject {
+    protected:
+        const static string _type;
     public:
         virtual void add(int n) = 0;
 
@@ -130,14 +95,14 @@ namespace GkcHostSvc
         virtual int getCount() = 0;
     };
 
-    class RealObject : public TestObject, public RealObjectBase
-    {
+    const string TestObject::_type = "counter";
+
+    class RealObject : public TestObject, public RealObjectBase {
     private:
         int _count = 0;
     public:
-        RealObject()
-        {
-            set_type("counter");
+        RealObject() {
+            RealObjectBase::_type = TestObject::_type;
         }
 
         void add(int n) override {
@@ -153,26 +118,10 @@ namespace GkcHostSvc
         }
     };
 
-    class ProxyObject : public TestObject {
-    private:
-        Connection *_rpcChannel;
-        EchoService_Stub _service;
-        RPCRequest _request;
-        RPCResponse _response;
-        RPCController _controller;
-        int _name;
+    class ProxyObject : public TestObject, public ProxyObjectBase {
+
     public:
-        ProxyObject(Connection *rpcChannel, const int name) : _rpcChannel(rpcChannel), _service(rpcChannel),
-                                                              _name(name) {
-            _request.set_clientid(_rpcChannel->getClientID());
-            _request.set_object(0);
-            _request.set_method("new");
-            _request.set_paramint(_name);
-            _request.set_paramstring("counter");
-
-            _service.RPC(&_controller, &_request, &_response, nullptr);
-
-        }
+        ProxyObject(Connection *rpcChannel, const int name) : ProxyObjectBase(rpcChannel, name, TestObject::_type) {}
 
         void add(int n) override {
             _request.set_clientid(_rpcChannel->getClientID());
@@ -205,14 +154,7 @@ namespace GkcHostSvc
             return _response.resultint();
         }
 
-        ~ProxyObject() {
-            _request.set_clientid(_rpcChannel->getClientID());
-            _request.set_object(0);
-            _request.set_method("delete");
-            _request.set_paramint(_name);
 
-            _service.RPC(&_controller, &_request, &_response, nullptr);
-        }
     };
 
     using ObjectMap=std::map<int, shared_ptr<RealObjectBase>>;

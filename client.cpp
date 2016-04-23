@@ -2,8 +2,8 @@
 // Created by lishunan on 16-4-2.
 //
 
-#include "HostSvcCommon.h"
-#include "RPCChannel.h"
+#include "HostSvcCommon.hpp"
+#include "RPCChannel.hpp"
 #include "TestObject.h"
 
 const static std::string server("127.0.0.1");

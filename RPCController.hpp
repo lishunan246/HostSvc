@@ -5,7 +5,7 @@
 #ifndef HOSTSVC_PRCCONTROLLER_H
 #define HOSTSVC_PRCCONTROLLER_H
 
-#include "HostSvcCommon.h"
+#include "HostSvcCommon.hpp"
 
 namespace GkcHostSvc {
     class RPCController : public protobuf::RpcController {

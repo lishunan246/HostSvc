@@ -5,7 +5,7 @@
 #ifndef HOSTSVC_RPCCHANNEL_H
 #define HOSTSVC_RPCCHANNEL_H
 
-#include "HostSvcCommon.h"
+#include "HostSvcCommon.hpp"
 
 using namespace GkcHostSvc;
 using namespace protobuf;
@@ -26,6 +26,10 @@ public:
     {
         asio::connect(_socket, _endpoint_iterator);
     }
+    Connection(const Connection&)= delete;
+    Connection(Connection&&)= default;
+    Connection& operator=(const Connection&)= delete;
+    Connection& operator=(Connection&&)= default;
 
     int getClientID()
     {

@@ -1,7 +1,7 @@
-#include "HostSvcCommon.h"
+#include "HostSvcCommon.hpp"
 #include "example.pb.h"
-#include "RPCController.h"
-#include "ServiceImpl.h"
+#include "RPCController.hpp"
+#include "ServiceImpl.hpp"
 
 namespace GkcHostSvc {
     class Client : public std::enable_shared_from_this<Client> {
